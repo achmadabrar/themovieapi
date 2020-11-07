@@ -10,7 +10,9 @@ import com.achmadabrar.movieapp_mandiri.R
 import com.achmadabrar.movieapp_mandiri.data.model.Result
 import com.achmadabrar.movieapp_mandiri.presentation.viewholder.ListMovieViewHolder
 
-class ListMoviePagedListAdapter: PagedListAdapter<Result, RecyclerView.ViewHolder>(DIFF_CALLBACK) {
+class ListMoviePagedListAdapter(
+    val listener: ListMovieViewHolder.Listener?
+) : PagedListAdapter<Result, RecyclerView.ViewHolder>(DIFF_CALLBACK) {
 
     companion object {
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Result>() {
@@ -24,15 +26,17 @@ class ListMoviePagedListAdapter: PagedListAdapter<Result, RecyclerView.ViewHolde
             }
         }
     }
-    
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return ListMovieViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.list_movie_item, parent, false))
+        return ListMovieViewHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.list_movie_item, parent, false)
+        )
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when(holder) {
+        when (holder) {
             is ListMovieViewHolder -> {
-                getItem(position).let { holder.bind(it) }
+                getItem(position).let { holder.bind(it, listener) }
             }
         }
     }

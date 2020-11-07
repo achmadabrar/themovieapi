@@ -7,7 +7,7 @@
     tools:context=".presentation.fragment.DetailPageFragment">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_genre_page"
+        android:id="@+id/toolbar_detail"
         app:layout_constraintTop_toTopOf="parent"
         android:background="#1E36BC"
         android:layout_width="match_parent"
@@ -15,11 +15,36 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_detail"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_genre_page"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <ImageView
+        android:id="@+id/image_view_detail"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_detail"
+        app:layout_constraintDimensionRatio="1:0.5"
+        tools:background="@color/colorPrimaryDark"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
         android:layout_width="match_parent"
         android:layout_height="0dp" />
+
+    <TextView
+        android:id="@+id/text_view_title_detail"
+        app:layout_constraintTop_toBottomOf="@id/image_view_detail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="20sp"
+        tools:text="Lari-Larian Film"
+        android:layout_margin="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/text_view_user_review"
+        app:layout_constraintTop_toBottomOf="@id/text_view_title_detail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="12dp"
+        android:textSize="14sp"
+        tools:text="Filmnya Bagus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

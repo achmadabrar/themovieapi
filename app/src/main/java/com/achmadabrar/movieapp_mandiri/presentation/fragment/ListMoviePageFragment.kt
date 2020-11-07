@@ -11,8 +11,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.achmadabrar.movieapp_mandiri.R
 import com.achmadabrar.movieapp_mandiri.core.base.BaseFragment
+import com.achmadabrar.movieapp_mandiri.data.model.Result
 import com.achmadabrar.movieapp_mandiri.presentation.adapter.ListMoviePagedListAdapter
 import com.achmadabrar.movieapp_mandiri.presentation.itemdecoration.ItemDecoration
+import com.achmadabrar.movieapp_mandiri.presentation.viewholder.ListMovieViewHolder
 import com.achmadabrar.movieapp_mandiri.presentation.viewmodel.MovieViewModel
 import kotlinx.android.synthetic.main.fragment_list_movie_page.*
 import javax.inject.Inject
@@ -20,12 +22,12 @@ import javax.inject.Inject
 /**
  * Abrar
  */
-class ListMoviePageFragment : BaseFragment() {
+class ListMoviePageFragment : BaseFragment(), ListMovieViewHolder.Listener {
 
     @Inject
     lateinit var viewModel: MovieViewModel
 
-    var adapter = ListMoviePagedListAdapter()
+    var adapter = ListMoviePagedListAdapter(this)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,6 +60,13 @@ class ListMoviePageFragment : BaseFragment() {
         rv_list_movie.layoutManager =
             GridLayoutManager(context, 1, LinearLayoutManager.VERTICAL, false)
         rv_list_movie.addItemDecoration(ItemDecoration())
+    }
+
+    override fun onClickMovie(result: Result?) {
+        val transaction = fragmentManager?.beginTransaction()
+        transaction?.replace(R.id.frameLayout, DetailPageFragment())
+        transaction?.addToBackStack(null)
+        transaction?.commit()
     }
 
 }
