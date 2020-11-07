@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_genre"
+        android:icon="@drawable/ic_baseline_genre_24"
+        android:title="@string/navigation_genre"/>
+
+    <item
+        android:id="@+id/nav_movie"
+        android:icon="@drawable/ic_movie_white"
+        android:title="@string/navigation_movie"/>
+
+</menu>

@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">MovieApp-Mandiri</string>
+    <string name="api_key">b80bdee7c041098a98259a34ec0c4178</string>
+    <string name="navigation_genre">Genre</string>
+    <string name="navigation_movie">Movie</string>
+    <string name="title">AQUAMANNNNNNNNNNNNNN</string>
+    <string name="year">(2019)</string>
+    <string name="see_all">Selengkapnya</string>
+    <string name="vote">Rating</string>
+    <string name="desc">A former American G.I. joins a yakuza family after his release from prison in post-World War II.</string>
+    <string name="list_movie">List Movie</string>
+    <string name="list_genre">List Genre</string>
+    <string name="detail_movie">Detail Movie</string>
+</resources>
