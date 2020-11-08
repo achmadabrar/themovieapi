@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.achmadabrar.movieapp_mandiri.R
 import com.achmadabrar.movieapp_mandiri.core.base.BaseFragment
 import com.achmadabrar.movieapp_mandiri.data.model.Result
+import com.achmadabrar.movieapp_mandiri.data.network.NetworkState
+import com.achmadabrar.movieapp_mandiri.presentation.adapter.ListMovieAdapter
 import com.achmadabrar.movieapp_mandiri.presentation.adapter.ListMoviePagedListAdapter
 import com.achmadabrar.movieapp_mandiri.presentation.itemdecoration.ItemDecoration
 import com.achmadabrar.movieapp_mandiri.presentation.viewholder.ListMovieViewHolder
@@ -27,7 +29,7 @@ class ListMoviePageFragment : BaseFragment(), ListMovieViewHolder.Listener {
     @Inject
     lateinit var viewModel: MovieViewModel
 
-    var adapter = ListMoviePagedListAdapter(this)
+    lateinit var adapter: ListMovieAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,31 +44,28 @@ class ListMoviePageFragment : BaseFragment(), ListMovieViewHolder.Listener {
         viewModel =
             ViewModelProviders.of(activity!!, viewModelFactory).get(MovieViewModel::class.java)
 
-        viewModel.genreSelectedLiveData.observe(viewLifecycleOwner, Observer {
-            viewModel.reloadMoviePage(it)
+        viewModel.listMovie.observe(viewLifecycleOwner, Observer {
+            if (!it.isNullOrEmpty()) {
+                adapter = ListMovieAdapter(it, this)
+                loadRecyclerView()
+            }
         })
-
-        loadRecyclerView()
-        viewModel.listMovieLiveData.observe(viewLifecycleOwner, Observer {
-            adapter.submitList(viewModel.getMovie(it))
-        })
-
-        /*(activity as AppCompatActivity).supportActionBar?.setTitle(R.string.list_movie)
-        (activity as AppCompatActivity).setSupportActionBar(toolbar_list_movie)*/
     }
 
     fun loadRecyclerView() {
         rv_list_movie.adapter = adapter
         rv_list_movie.layoutManager =
-            GridLayoutManager(context, 1, LinearLayoutManager.VERTICAL, false)
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         rv_list_movie.addItemDecoration(ItemDecoration())
     }
 
     override fun onClickMovie(result: Result?) {
+        viewModel.getSelectedMovie(result)
+        viewModel.getReviewFromApi(result?.id?.toInt())
+        viewModel.getYoutubeKey(result?.id?.toInt())
         val transaction = fragmentManager?.beginTransaction()
         transaction?.replace(R.id.frameLayout, DetailPageFragment())
         transaction?.addToBackStack(null)
         transaction?.commit()
     }
-
 }

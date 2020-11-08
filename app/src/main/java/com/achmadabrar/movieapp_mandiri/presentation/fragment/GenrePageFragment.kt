@@ -61,7 +61,7 @@ class GenrePageFragment : BaseFragment(), GenreViewHolder.OnClickListener {
     }
 
     override fun onClickGenre(genres: Genre?) {
-        viewModel.getGenreSelected(genres)
+        viewModel.getTheListMovie(genres)
         val fragmentTransaction = fragmentManager?.beginTransaction()
         fragmentTransaction?.replace(R.id.frameLayout, ListMoviePageFragment())
         fragmentTransaction?.addToBackStack("genre")

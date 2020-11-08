@@ -1,17 +1,9 @@
 package com.achmadabrar.movieapp_mandiri.presentation.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.paging.LivePagedListBuilder
-import androidx.paging.PagedList
 import com.achmadabrar.movieapp_mandiri.core.base.BaseViewModel
-import com.achmadabrar.movieapp_mandiri.data.datasource.ListMovieDataSource
-import com.achmadabrar.movieapp_mandiri.data.factory.ListMovieFactory
-import com.achmadabrar.movieapp_mandiri.data.model.Genre
-import com.achmadabrar.movieapp_mandiri.data.model.ResponseGenres
-import com.achmadabrar.movieapp_mandiri.data.model.Result
+import com.achmadabrar.movieapp_mandiri.data.model.*
 import com.achmadabrar.movieapp_mandiri.data.network.NetworkState
 import com.achmadabrar.movieapp_mandiri.data.network.TheMovieApiServices
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -23,42 +15,44 @@ class MovieViewModel @Inject constructor(
     private val api: TheMovieApiServices
 ) : BaseViewModel<MovieViewModel>() {
 
-    //section for get list movie
-    var networkLiveData: LiveData<NetworkState>
-    var listMovieLiveData: LiveData<PagedList<Result>>
-    var listMovieFactory: ListMovieFactory
-
-    var listMovieByGenre = mutableListOf<Result>()
+    var listResultMovie = mutableListOf<Result>()
+    var listMovie: MutableLiveData<List<Result>> = MutableLiveData()
 
     //section for get list genre
     val networkStatusLiveData: MutableLiveData<NetworkState> = MutableLiveData()
     private val supervisorJob = SupervisorJob()
     var genrePageLiveData: MutableLiveData<ResponseGenres> = MutableLiveData()
-    var genreSelectedLiveData: MutableLiveData<Genre> = MutableLiveData()
-    var genres: Genre? = null
 
-    var pagedList: PagedList<Result>? = null
+    //selected movie
+    var movieSelectedLiveData: MutableLiveData<Result> = MutableLiveData()
+
+    //review
+    var reviewPageLiveData: MutableLiveData<ResponseReview> = MutableLiveData()
+
+    //youtube
+    var youtubeLiveData: MutableLiveData<ResponseYoutube> = MutableLiveData()
+
 
     init {
         //for get genre
         getGenreFromApi()
+    }
 
-        //for get the list movie
-        listMovieFactory = ListMovieFactory(
-
-            ioScope, api, genres
-        )
-
-        val config = PagedList.Config.Builder()
-            .setPageSize(ListMovieDataSource.PAGE_SIZE)
-            .setInitialLoadSizeHint(ListMovieDataSource.INITIAL_PAGE)
-            .setPrefetchDistance(ListMovieDataSource.PREFECTH_DISTANCE)
-            .setEnablePlaceholders(false)
-            .build()
-
-        listMovieLiveData = LivePagedListBuilder<Int, Result>(listMovieFactory, config).build()
-        networkLiveData = Transformations.switchMap(listMovieFactory.dataSourceLiveData) {
-            it.networkStatusLiveData
+    fun getTheListMovie(genre: Genre?) {
+        ioScope.launch {
+            getJobErrorHandler() + supervisorJob
+            val movies = api.getPopular()
+            movies.results.forEach { newResult ->
+                if (newResult.genreId.contains(genre?.id?.toInt())) {
+                    listResultMovie.add(newResult)
+                    listMovie.postValue(listResultMovie)
+                }
+            }
+            if (listResultMovie.isEmpty()) {
+                networkStatusLiveData.postValue(NetworkState.EMPTY)
+            } else {
+                networkStatusLiveData.postValue(NetworkState.LOADED)
+            }
         }
     }
 
@@ -76,48 +70,37 @@ class MovieViewModel @Inject constructor(
     }
 
     private fun getJobErrorHandler() = CoroutineExceptionHandler { _, e ->
-        Log.e(ListMovieDataSource::class.java.simpleName, "An error happened: $e")
+        Log.e(MovieViewModel::class.java.simpleName, "An error happened: $e")
         networkStatusLiveData.postValue(NetworkState.fialed(e.localizedMessage))
     }
 
-    fun getGenreSelected(genre: Genre?): Genre {
-        genreSelectedLiveData.postValue(genre)
-        return genre!!
+    fun getSelectedMovie(result: Result?) {
+        movieSelectedLiveData.postValue(result)
     }
 
-    fun getMovie(result: PagedList<Result>): PagedList<Result> {
-        result.forEach { newResult ->
-            newResult.genreId.forEach {
-                if (genres?.id != null) {
-                    if (it.toLong() == genres!!.id) {
-                        Log.d("genreId", "$it sama dengan ${genres!!.id}")
-                    }
-                }
+    fun getReviewFromApi(movieId: Int?) {
+        ioScope.launch {
+            getJobErrorHandler() + supervisorJob
+            val reviews = api.getReview(movieId!!)
+            reviewPageLiveData.postValue(reviews)
+            if (reviews.results.isEmpty()) {
+                networkStatusLiveData.postValue(NetworkState.EMPTY)
+            } else {
+                networkStatusLiveData.postValue(NetworkState.LOADED)
             }
         }
-        if (pagedList != null) {
-            return pagedList as PagedList<Result>
-        } else {
-            return result
-        }
     }
 
-    fun reloadMoviePage(genre: Genre?) {
-        listMovieFactory = ListMovieFactory(
-
-            ioScope, api, genre
-        )
-
-        val config = PagedList.Config.Builder()
-            .setPageSize(ListMovieDataSource.PAGE_SIZE)
-            .setInitialLoadSizeHint(ListMovieDataSource.INITIAL_PAGE)
-            .setPrefetchDistance(ListMovieDataSource.PREFECTH_DISTANCE)
-            .setEnablePlaceholders(false)
-            .build()
-
-        listMovieLiveData = LivePagedListBuilder<Int, Result>(listMovieFactory, config).build()
-        networkLiveData = Transformations.switchMap(listMovieFactory.dataSourceLiveData) {
-            it.networkStatusLiveData
+    fun getYoutubeKey(movieId: Int?) {
+        ioScope.launch {
+            getJobErrorHandler() + supervisorJob
+            val reviews = api.getYoutubeVideo(movieId!!)
+            youtubeLiveData.postValue(reviews)
+            if (reviews.results.isEmpty()) {
+                networkStatusLiveData.postValue(NetworkState.EMPTY)
+            } else {
+                networkStatusLiveData.postValue(NetworkState.LOADED)
+            }
         }
     }
 

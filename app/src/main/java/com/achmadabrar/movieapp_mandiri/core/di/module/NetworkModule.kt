@@ -1,6 +1,8 @@
 package com.achmadabrar.movieapp_mandiri.core.di.module
 
+import android.app.Application
 import androidx.multidex.BuildConfig
+import com.achmadabrar.movieapp_mandiri.data.database.MovieDatabase
 import com.achmadabrar.movieapp_mandiri.data.network.TheMovieApiServices
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -9,6 +11,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Singleton
 
 @Module
 class NetworkModule {
@@ -41,5 +44,21 @@ class NetworkModule {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
+
+    @Singleton
+    @Provides
+    fun provideDb(app: Application) = MovieDatabase.getInstance(app)
+
+    @Singleton
+    @Provides
+    fun provideGenreDao(movieDatabase: MovieDatabase) = movieDatabase.genreDao()
+
+    @Singleton
+    @Provides
+    fun provideMovieDao(movieDatabase: MovieDatabase) = movieDatabase.movieDao()
+
+    @Singleton
+    @Provides
+    fun provideReviewDao(movieDatabase: MovieDatabase) = movieDatabase.reviewDao()
 
 }
