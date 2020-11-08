@@ -7,17 +7,15 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.achmadabrar.movieapp_mandiri.R
 import com.achmadabrar.movieapp_mandiri.core.base.BaseFragment
 import com.achmadabrar.movieapp_mandiri.data.model.Result
-import com.achmadabrar.movieapp_mandiri.data.network.NetworkState
 import com.achmadabrar.movieapp_mandiri.presentation.adapter.ListMovieAdapter
-import com.achmadabrar.movieapp_mandiri.presentation.adapter.ListMoviePagedListAdapter
 import com.achmadabrar.movieapp_mandiri.presentation.itemdecoration.ItemDecoration
 import com.achmadabrar.movieapp_mandiri.presentation.viewholder.ListMovieViewHolder
 import com.achmadabrar.movieapp_mandiri.presentation.viewmodel.MovieViewModel
+import kotlinx.android.synthetic.main.fragment_genre_page.*
 import kotlinx.android.synthetic.main.fragment_list_movie_page.*
 import javax.inject.Inject
 
@@ -50,6 +48,9 @@ class ListMoviePageFragment : BaseFragment(), ListMovieViewHolder.Listener {
                 loadRecyclerView()
             }
         })
+
+        /*(activity as AppCompatActivity).supportActionBar?.setTitle(R.string.list_movie)
+        (activity as AppCompatActivity).setSupportActionBar(toolbar_list_movie)*/
     }
 
     fun loadRecyclerView() {

@@ -6,16 +6,13 @@ import com.achmadabrar.movieapp_mandiri.data.model.ResponsePopular
 import java.util.*
 
 @Dao
-@TypeConverters(ResponseMovieConverter::class)
 interface MovieDao {
-    interface SearchGenreDao {
-        @Query("SELECT * FROM popular_list_table")
-        suspend fun getListMovie(): List<ResponsePopular>
+    @Query("SELECT * FROM popular_list_table")
+    suspend fun getListMovie(): ResponsePopular?
 
-        @Query("DELETE FROM genre_list_table WHERE expiredDate < :expiredDate")
-        suspend fun deleteListMovie(expiredDate: Date)
+    @Query("DELETE FROM popular_list_table WHERE expiredDate < :expiredDate")
+    suspend fun deleteListMovie(expiredDate: Date)
 
-        @Insert(onConflict = OnConflictStrategy.REPLACE)
-        suspend fun insertListMovie(listShop: List<ResponsePopular>)
-    }
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertListMovie(listMovie: ResponsePopular)
 }

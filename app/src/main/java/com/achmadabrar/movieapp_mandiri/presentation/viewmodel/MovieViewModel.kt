@@ -3,17 +3,27 @@ package com.achmadabrar.movieapp_mandiri.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.achmadabrar.movieapp_mandiri.core.base.BaseViewModel
+import com.achmadabrar.movieapp_mandiri.data.database.GenreDao
+import com.achmadabrar.movieapp_mandiri.data.database.MovieDao
+import com.achmadabrar.movieapp_mandiri.data.database.ReviewDao
 import com.achmadabrar.movieapp_mandiri.data.model.*
 import com.achmadabrar.movieapp_mandiri.data.network.NetworkState
 import com.achmadabrar.movieapp_mandiri.data.network.TheMovieApiServices
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
+private const val ONE_HOUR_CACHE = 3600 * 1000
 class MovieViewModel @Inject constructor(
-    private val api: TheMovieApiServices
+    private val api: TheMovieApiServices,
+    private val movieDao: MovieDao,
+    private val genreDao: GenreDao,
+    private val reviewDao: ReviewDao
 ) : BaseViewModel<MovieViewModel>() {
+
+    val currentDate = Date(System.currentTimeMillis())
 
     var listResultMovie = mutableListOf<Result>()
     var listMovie: MutableLiveData<List<Result>> = MutableLiveData()
@@ -35,36 +45,54 @@ class MovieViewModel @Inject constructor(
 
     init {
         //for get genre
-        getGenreFromApi()
+        getGenre()
     }
 
     fun getTheListMovie(genre: Genre?) {
         ioScope.launch {
             getJobErrorHandler() + supervisorJob
-            val movies = api.getPopular()
-            movies.results.forEach { newResult ->
-                if (newResult.genreId.contains(genre?.id?.toInt())) {
-                    listResultMovie.add(newResult)
-                    listMovie.postValue(listResultMovie)
+            val moviesDao = movieDao.getListMovie()
+            movieDao.deleteListMovie(currentDate)
+            if (moviesDao?.results.isNullOrEmpty()) {
+                val movies = api.getPopular()
+                movies.results.forEach { newResult ->
+                    if (newResult.genreId.contains(genre?.id?.toInt())) {
+                        listResultMovie.add(newResult)
+                        listMovie.postValue(listResultMovie)
+                    }
                 }
-            }
-            if (listResultMovie.isEmpty()) {
-                networkStatusLiveData.postValue(NetworkState.EMPTY)
+                val newResponse = ResponsePopular(results = listResultMovie, expiredDate = Date(System.currentTimeMillis() + ONE_HOUR_CACHE))
+                val data = movieDao.insertListMovie(newResponse)
+                Log.d("movie-dao", "movie yang disimpan ke database : $data")
+                if (listResultMovie.isEmpty()) {
+                    networkStatusLiveData.postValue(NetworkState.EMPTY)
+                } else {
+                    networkStatusLiveData.postValue(NetworkState.LOADED)
+                }
             } else {
-                networkStatusLiveData.postValue(NetworkState.LOADED)
+                listMovie.postValue(moviesDao?.results)
             }
         }
     }
 
-    fun getGenreFromApi() {
+    fun getGenre() {
         ioScope.launch {
             getJobErrorHandler() + supervisorJob
-            val genres = api.getGenres()
-            genrePageLiveData.postValue(genres)
-            if (genres.genres.isEmpty()) {
-                networkStatusLiveData.postValue(NetworkState.EMPTY)
+            val genreList = genreDao.getListGenre()
+            genreDao.deleteListGenre(currentDate)
+            if (genreList?.genres.isNullOrEmpty()) {
+                val genres = api.getGenres()
+                genrePageLiveData.postValue(genres)
+                val newResponse = ResponseGenres(genres = genres.genres, expiredDate = Date(System.currentTimeMillis() + ONE_HOUR_CACHE))
+                val data = genreDao.insertListGenre(newResponse)
+                Log.d("genres-dao", "data yang disimpan di room $data")
+                if (genres.genres.isEmpty()) {
+                    networkStatusLiveData.postValue(NetworkState.EMPTY)
+                } else {
+                    networkStatusLiveData.postValue(NetworkState.LOADED)
+                }
             } else {
-                networkStatusLiveData.postValue(NetworkState.LOADED)
+                genrePageLiveData.postValue(genreList)
             }
         }
     }
@@ -80,13 +108,21 @@ class MovieViewModel @Inject constructor(
 
     fun getReviewFromApi(movieId: Int?) {
         ioScope.launch {
-            getJobErrorHandler() + supervisorJob
-            val reviews = api.getReview(movieId!!)
-            reviewPageLiveData.postValue(reviews)
-            if (reviews.results.isEmpty()) {
-                networkStatusLiveData.postValue(NetworkState.EMPTY)
+            val reviewsDao = reviewDao.getListReview()
+            reviewDao.deleteListReview(currentDate)
+            if (reviewsDao?.results.isNullOrEmpty()) {
+                val reviews = api.getReview(movieId!!)
+                reviewPageLiveData.postValue(reviews)
+                val newResponse = ResponseReview(id = reviews.id, page = reviews.page, results = reviews.results, expiredDate = Date(System.currentTimeMillis() + ONE_HOUR_CACHE))
+                val data = reviewDao.insertListReview(newResponse)
+                Log.d("review-dao", " data review yang kesimpan ke database $data")
+                if (reviews.results.isEmpty()) {
+                    networkStatusLiveData.postValue(NetworkState.EMPTY)
+                } else {
+                    networkStatusLiveData.postValue(NetworkState.LOADED)
+                }
             } else {
-                networkStatusLiveData.postValue(NetworkState.LOADED)
+                reviewPageLiveData.postValue(reviewsDao)
             }
         }
     }

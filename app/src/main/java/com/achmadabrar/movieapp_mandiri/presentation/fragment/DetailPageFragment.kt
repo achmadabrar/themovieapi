@@ -62,7 +62,7 @@ class DetailPageFragment : BaseFragment(), ReviewViewHolder.Listener {
         transaction?.commit()
 
         viewModel.youtubeLiveData.observe(viewLifecycleOwner, Observer {
-            youTubePlayerFragment.initialize(it.results[0].key, object: YouTubePlayer.OnInitializedListener{
+            youTubePlayerFragment.initialize(it.results.last().key, object: YouTubePlayer.OnInitializedListener{
                 override fun onInitializationSuccess(
                     provider: YouTubePlayer.Provider?,
                     youTubePlayer: YouTubePlayer?,

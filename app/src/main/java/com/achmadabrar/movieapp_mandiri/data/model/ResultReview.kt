@@ -4,8 +4,8 @@ import androidx.room.Entity
 
 @Entity
 data class ResultReview (
-    val author: String? = null,
-    val content: String? = null,
-    val id: String? = null,
-    val url: String? = null
+    val author: String,
+    val content: String,
+    val id: String,
+    val url: String
 )

@@ -8,14 +8,12 @@ import java.util.*
 @Dao
 @TypeConverters(ResponseReviewConverter::class)
 interface ReviewDao {
-    interface SearchGenreDao {
-        @Query("SELECT * FROM popular_list_table")
-        suspend fun getListReview(): List<ResponseReview>
+    @Query("SELECT * FROM review_user_table")
+    suspend fun getListReview(): ResponseReview?
 
-        @Query("DELETE FROM genre_list_table WHERE expiredDate < :expiredDate")
-        suspend fun deleteListReview(expiredDate: Date)
+    @Query("DELETE FROM review_user_table WHERE expiredDate < :expiredDate")
+    suspend fun deleteListReview(expiredDate: Date)
 
-        @Insert(onConflict = OnConflictStrategy.REPLACE)
-        suspend fun insertListReview(listShop: List<ResponseReview>)
-    }
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertListReview(listReview: ResponseReview)
 }

@@ -4,11 +4,13 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.achmadabrar.movieapp_mandiri.data.database.converter.ResultReviewConverter
+import java.util.*
 
 @Entity(tableName = "review_user_table")
 @TypeConverters(ResultReviewConverter::class)
 data class ResponseReview (
-    @PrimaryKey val id: Long,
+    val id: Long,
     val page: Int,
-    val results: List<ResultReview>
+    @PrimaryKey val results: List<ResultReview>,
+    val expiredDate: Date?
 )
